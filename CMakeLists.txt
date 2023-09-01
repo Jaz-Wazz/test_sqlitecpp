@@ -1,11 +1,37 @@
 # CMake version.
 cmake_minimum_required(VERSION "3.26.3")
 
+# Modules.
+include("FetchContent")
+
 # Project.
 project("test_sqlitecpp")
 
 # Find libs.
 find_package("fmt" REQUIRED)
+find_package("SQLite3" REQUIRED)
+
+# [sqlitecpp] - download.
+FetchContent_Populate("package_sqlitecpp" URL "https://github.com/SRombauts/SQLiteCpp/archive/master.zip")
+
+# [sqlitecpp] - make library.
+add_library(sqlitecpp STATIC
+	"${package_sqlitecpp_SOURCE_DIR}/src/Backup.cpp"
+	"${package_sqlitecpp_SOURCE_DIR}/src/Column.cpp"
+	"${package_sqlitecpp_SOURCE_DIR}/src/Database.cpp"
+	"${package_sqlitecpp_SOURCE_DIR}/src/Exception.cpp"
+	"${package_sqlitecpp_SOURCE_DIR}/src/Savepoint.cpp"
+	"${package_sqlitecpp_SOURCE_DIR}/src/Statement.cpp"
+	"${package_sqlitecpp_SOURCE_DIR}/src/Transaction.cpp"
+)
+
+# [sqlitecpp] - add includes.
+target_include_directories(sqlitecpp PUBLIC
+	"${package_sqlitecpp_SOURCE_DIR}/include"
+)
+
+# [sqlitecpp] - linkage.
+target_link_libraries(sqlitecpp PRIVATE SQLite3)
 
 # Find sources.
 file(GLOB_RECURSE src "src/*")
@@ -21,6 +47,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CMAKE_CXX_EXTENSIONS OFF)
 # [Target] - Linking.
 target_link_libraries(${PROJECT_NAME} PRIVATE
 	fmt::fmt
+	sqlitecpp
 )
 
 # [Clang] - Enable LTO optimization.
